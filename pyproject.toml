@@ -1,0 +1,70 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tether-name"
+version = "0.1.0"
+description = "Official Python SDK for Tether.name - AI agent identity verification"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Commit 451", email = "jawnnypoo@gmail.com"},
+]
+maintainers = [
+    {name = "Commit 451", email = "jawnnypoo@gmail.com"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords = ["ai", "agent", "identity", "verification", "cryptography", "tether"]
+requires-python = ">=3.8"
+dependencies = [
+    "httpx>=0.20.0",
+    "cryptography>=3.4.0",
+]
+
+[project.urls]
+Homepage = "https://tether.name"
+Documentation = "https://github.com/Commit451/tether-name-python#readme"
+Repository = "https://github.com/Commit451/tether-name-python"
+"Bug Tracker" = "https://github.com/Commit451/tether-name-python/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov",
+    "black",
+    "isort",
+    "mypy",
+    "pre-commit",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tether_name"]
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
