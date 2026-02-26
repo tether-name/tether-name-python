@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
+      contents: write  # create GitHub release
       id-token: write  # trusted publishing
     steps:
       - uses: actions/checkout@v4
