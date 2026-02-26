@@ -24,9 +24,9 @@ from .exceptions import (
     TetherKeyError
 )
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __author__ = "Commit 451"
-__email__ = "jawnnypoo@gmail.com"
+__email__ = "python@tether.name"
 __homepage__ = "https://tether.name"
 
 __all__ = [
