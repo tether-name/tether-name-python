@@ -1,6 +1,6 @@
 # Tether.name Python SDK
 
-[![PyPI version](https://badge.fury.io/py/tether-name.svg)](https://pypi.org/project/tether-name/)
+[![PyPI](https://img.shields.io/pypi/v/tether-name)](https://pypi.org/project/tether-name/)
 [![Python versions](https://img.shields.io/pypi/pyversions/tether-name.svg)](https://pypi.org/project/tether-name/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
