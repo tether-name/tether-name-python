@@ -45,7 +45,7 @@ One line to start managing agents programmatically:
 ```python
 from tether_name import TetherClient
 
-client = TetherClient(api_key="tether_sk_...")
+client = TetherClient(api_key="sk-tether-name-...")
 
 # Create, list, and delete agents
 agent = client.create_agent("my-bot")
@@ -72,7 +72,7 @@ The SDK supports two authentication modes:
 **API Key** — for agent management (create, list, delete):
 
 ```python
-client = TetherClient(api_key="tether_sk_...")
+client = TetherClient(api_key="sk-tether-name-...")
 ```
 
 **Private Key** — for identity verification (sign, verify):
@@ -88,7 +88,7 @@ client = TetherClient(
 
 ```python
 client = TetherClient(
-    api_key="tether_sk_...",
+    api_key="sk-tether-name-...",
     credential_id="your-credential-id",
     private_key_path="/path/to/key.der"
 )
@@ -99,7 +99,7 @@ client = TetherClient(
 Set these environment variables to avoid hardcoding credentials:
 
 ```bash
-export TETHER_API_KEY="tether_sk_..."
+export TETHER_API_KEY="sk-tether-name-..."
 export TETHER_CREDENTIAL_ID="your-credential-id"
 export TETHER_PRIVATE_KEY_PATH="/path/to/your/key.der"
 ```
@@ -344,7 +344,7 @@ with TetherClient(credential_id="...", private_key_path="...") as client:
 ## 🛡️ Security Notes
 
 - **Private Key Security**: Never commit private keys to version control or share them publicly
-- **API Key Security**: API keys are hashed before storage. The `tether_sk_` prefix enables leak detection. Revoke compromised keys immediately
+- **API Key Security**: API keys are hashed before storage. The `sk-tether-name-` prefix enables leak detection. Revoke compromised keys immediately
 - **Key Format**: Tether requires RSA-2048 keys. Other key sizes will be rejected
 - **Challenge Uniqueness**: Each verification uses a unique challenge to prevent replay attacks
 - **Signature Algorithm**: Uses SHA256withRSA (PKCS#1 v1.5 padding) as specified by Tether
