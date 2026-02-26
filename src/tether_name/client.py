@@ -29,8 +29,8 @@ class VerificationResult:
 
 
 @dataclass
-class Credential:
-    """A Tether.name agent credential."""
+class Agent:
+    """A Tether.name agent."""
 
     id: str
     agent_name: str
@@ -295,18 +295,18 @@ class TetherClient:
                 raise
             raise TetherError(f"Verification failed: {e}")
 
-    def create_credential(self, agent_name: str, description: str = "") -> Credential:
+    def create_agent(self, agent_name: str, description: str = "") -> Agent:
         """
-        Create a new agent credential.
+        Create a new agent.
 
         Requires API key or JWT auth.
 
         Args:
-            agent_name: Name for the agent credential
+            agent_name: Name for the agent
             description: Optional description
 
         Returns:
-            Credential: The newly created credential
+            Agent: The newly created agent
 
         Raises:
             TetherAPIError: If the API request fails
@@ -320,7 +320,7 @@ class TetherClient:
             response.raise_for_status()
 
             data = response.json()
-            return Credential(
+            return Agent(
                 id=data["id"],
                 agent_name=data["agentName"],
                 description=data.get("description", ""),
@@ -330,21 +330,21 @@ class TetherClient:
 
         except httpx.HTTPStatusError as e:
             raise TetherAPIError(
-                f"Create credential failed: {e.response.status_code}",
+                f"Create agent failed: {e.response.status_code}",
                 e.response.status_code,
                 e.response.text
             )
         except httpx.RequestError as e:
-            raise TetherAPIError(f"Create credential failed: {e}")
+            raise TetherAPIError(f"Create agent failed: {e}")
 
-    def list_credentials(self) -> list[Credential]:
+    def list_agents(self) -> list[Agent]:
         """
-        List all credentials.
+        List all agents.
 
         Requires API key or JWT auth.
 
         Returns:
-            list[Credential]: All credentials
+            list[Agent]: All agents
 
         Raises:
             TetherAPIError: If the API request fails
@@ -357,7 +357,7 @@ class TetherClient:
             response.raise_for_status()
 
             data = response.json()
-            return [Credential(
+            return [Agent(
                 id=c["id"],
                 agent_name=c["agentName"],
                 description=c.get("description", ""),
@@ -367,40 +367,40 @@ class TetherClient:
 
         except httpx.HTTPStatusError as e:
             raise TetherAPIError(
-                f"List credentials failed: {e.response.status_code}",
+                f"List agents failed: {e.response.status_code}",
                 e.response.status_code,
                 e.response.text
             )
         except httpx.RequestError as e:
-            raise TetherAPIError(f"List credentials failed: {e}")
+            raise TetherAPIError(f"List agents failed: {e}")
 
-    def delete_credential(self, credential_id: str) -> bool:
+    def delete_agent(self, agent_id: str) -> bool:
         """
-        Delete a credential.
+        Delete an agent.
 
         Requires API key or JWT auth.
 
         Args:
-            credential_id: ID of the credential to delete
+            agent_id: ID of the agent to delete
 
         Returns:
-            bool: True if the credential was deleted successfully
+            bool: True if the agent was deleted successfully
 
         Raises:
             TetherAPIError: If the API request fails
         """
         try:
             response = self._client.delete(
-                f"{self.base_url}/credentials/{credential_id}",
+                f"{self.base_url}/credentials/{agent_id}",
                 headers=self._auth_headers()
             )
             return response.status_code == 200
 
         except httpx.HTTPStatusError as e:
             raise TetherAPIError(
-                f"Delete credential failed: {e.response.status_code}",
+                f"Delete agent failed: {e.response.status_code}",
                 e.response.status_code,
                 e.response.text
             )
         except httpx.RequestError as e:
-            raise TetherAPIError(f"Delete credential failed: {e}")
+            raise TetherAPIError(f"Delete agent failed: {e}")
