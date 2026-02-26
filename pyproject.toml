@@ -37,9 +37,9 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://tether.name"
-Documentation = "https://github.com/Commit451/tether-name-python#readme"
-Repository = "https://github.com/Commit451/tether-name-python"
-"Bug Tracker" = "https://github.com/Commit451/tether-name-python/issues"
+Documentation = "https://github.com/tether-name/tether-name-python#readme"
+Repository = "https://github.com/tether-name/tether-name-python"
+"Bug Tracker" = "https://github.com/tether-name/tether-name-python/issues"
 
 [project.optional-dependencies]
 dev = [

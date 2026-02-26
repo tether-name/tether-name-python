@@ -288,15 +288,15 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🤝 Contributing
 
-Contributions welcome! Please see the [GitHub repository](https://github.com/Commit451/tether-name-python) for details.
+Contributions welcome! Please see the [GitHub repository](https://github.com/tether-name/tether-name-python) for details.
 
 ## 🔗 Links
 
 - **🌐 Tether.name**: [https://tether.name](https://tether.name)  
 - **📦 PyPI Package**: [https://pypi.org/project/tether-name/](https://pypi.org/project/tether-name/)
-- **💻 Source Code**: [https://github.com/Commit451/tether-name-python](https://github.com/Commit451/tether-name-python)
+- **💻 Source Code**: [https://github.com/tether-name/tether-name-python](https://github.com/tether-name/tether-name-python)
 - **📖 API Documentation**: [https://tether.name/docs](https://tether.name/docs)
-- **❓ Support**: [jawnnypoo@gmail.com](mailto:jawnnypoo@gmail.com)
+- **❓ Support**: [support@tether.name](mailto:support@tether.name)
 
 ---
 
