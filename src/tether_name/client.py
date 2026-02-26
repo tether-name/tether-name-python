@@ -191,14 +191,20 @@ class TetherClient:
                     challenge=challenge
                 )
             
-            # Parse registered_since if present
+            # Parse registered_since if present (epoch ms or ISO string)
             registered_since = None
             if "registeredSince" in data:
                 try:
-                    registered_since = datetime.fromisoformat(
-                        data["registeredSince"].replace('Z', '+00:00')
-                    )
-                except (ValueError, TypeError):
+                    raw = data["registeredSince"]
+                    if isinstance(raw, (int, float)):
+                        registered_since = datetime.fromtimestamp(
+                            raw / 1000.0, tz=None
+                        )
+                    elif isinstance(raw, str):
+                        registered_since = datetime.fromisoformat(
+                            raw.replace('Z', '+00:00')
+                        )
+                except (ValueError, TypeError, OSError):
                     pass  # Ignore invalid date formats
             
             return VerificationResult(
