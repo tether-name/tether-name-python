@@ -15,7 +15,7 @@ Example:
     ...     print(f"Verified as {result.agent_name}")
 """
 
-from .client import TetherClient, VerificationResult
+from .client import Credential, TetherClient, VerificationResult
 from .crypto import load_private_key, sign_challenge, generate_test_keypair
 from .exceptions import (
     TetherError,
@@ -33,6 +33,7 @@ __all__ = [
     # Main classes
     "TetherClient",
     "VerificationResult",
+    "Credential",
     
     # Crypto functions
     "load_private_key",
