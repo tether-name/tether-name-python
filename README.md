@@ -282,6 +282,32 @@ except TetherError as e:
 - **Dependencies**: `httpx>=0.20.0`, `cryptography>=3.4.0`
 - **Key Format**: RSA-2048 private key (PEM or DER)
 
+## 📦 Publishing
+
+Published to PyPI automatically via GitHub Actions when a release is created (uses trusted publishing).
+
+### Version checklist
+
+Update the version in:
+
+1. `pyproject.toml` → `version`
+2. `src/tether_name/__init__.py` → `__version__`
+
+### Steps
+
+1. Update version numbers above (they must match)
+2. Commit and push to `main`
+3. Create a GitHub release with a matching tag (e.g. `v1.0.0`)
+4. CI builds and publishes to PyPI automatically
+
+### Manual publish (if needed)
+
+```bash
+pip install build twine
+python -m build
+twine upload dist/*
+```
+
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
