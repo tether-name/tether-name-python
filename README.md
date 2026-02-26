@@ -38,6 +38,21 @@ else:
     print(f"❌ Verification failed: {result.error}")
 ```
 
+### Agent Management
+
+One line to start managing agents programmatically:
+
+```python
+from tether_name import TetherClient
+
+client = TetherClient(api_key="tether_sk_...")
+
+# Create, list, and delete agents
+agent = client.create_agent("my-bot")
+agents = client.list_agents()
+client.delete_agent(agent.id)
+```
+
 ## 📖 How Tether Works
 
 Tether.name provides cryptographic identity verification for AI agents through a simple 3-step process:
@@ -50,11 +65,41 @@ This creates unforgeable digital identity that anyone can verify.
 
 ## 🔧 Configuration
 
+### Authentication
+
+The SDK supports two authentication modes:
+
+**API Key** — for agent management (create, list, delete):
+
+```python
+client = TetherClient(api_key="tether_sk_...")
+```
+
+**Private Key** — for identity verification (sign, verify):
+
+```python
+client = TetherClient(
+    credential_id="your-credential-id",
+    private_key_path="/path/to/key.der"
+)
+```
+
+**Both** — for full access:
+
+```python
+client = TetherClient(
+    api_key="tether_sk_...",
+    credential_id="your-credential-id",
+    private_key_path="/path/to/key.der"
+)
+```
+
 ### Environment Variables
 
 Set these environment variables to avoid hardcoding credentials:
 
 ```bash
+export TETHER_API_KEY="tether_sk_..."
 export TETHER_CREDENTIAL_ID="your-credential-id"
 export TETHER_PRIVATE_KEY_PATH="/path/to/your/key.der"
 ```
@@ -104,12 +149,23 @@ Main client for Tether.name API interactions.
 TetherClient(
     credential_id: Optional[str] = None,
     private_key_path: Optional[Union[str, Path]] = None,
-    private_key_pem: Optional[Union[str, bytes]] = None, 
+    private_key_pem: Optional[Union[str, bytes]] = None,
     private_key_der: Optional[bytes] = None,
     base_url: str = "https://api.tether.name",
-    timeout: float = 30.0
+    timeout: float = 30.0,
+    api_key: Optional[str] = None
 )
 ```
+
+| Parameter | Env var | Description |
+|---|---|---|
+| `api_key` | `TETHER_API_KEY` | API key for agent management operations |
+| `credential_id` | `TETHER_CREDENTIAL_ID` | Credential ID for identity verification |
+| `private_key_path` | `TETHER_PRIVATE_KEY_PATH` | Path to RSA-2048 private key (PEM or DER) |
+| `private_key_pem` | — | PEM-encoded private key string |
+| `private_key_der` | — | DER-encoded private key bytes |
+
+When `api_key` is set, `credential_id` and private key parameters become optional (only needed for verify/sign operations).
 
 #### Methods
 
@@ -152,6 +208,50 @@ Submit signed challenge for verification.
 challenge = client.request_challenge()
 signature = client.sign(challenge)
 result = client.submit_proof(challenge, signature)
+```
+
+##### `create_agent(agent_name: str, description: str = "") -> Agent`
+
+Create a new agent. Requires API key authentication.
+
+```python
+agent = client.create_agent("my-bot", description="My automated agent")
+print(agent.id)                # Agent ID
+print(agent.agent_name)        # "my-bot"
+print(agent.registration_token) # Token for agent registration
+```
+
+##### `list_agents() -> list[Agent]`
+
+List all agents. Requires API key authentication.
+
+```python
+agents = client.list_agents()
+for agent in agents:
+    print(f"{agent.agent_name} (created {agent.created_at})")
+```
+
+##### `delete_agent(agent_id: str) -> bool`
+
+Delete an agent. Requires API key authentication.
+
+```python
+client.delete_agent("agent-id-here")
+```
+
+### `Agent`
+
+Agent object returned by management operations.
+
+```python
+@dataclass
+class Agent:
+    id: str                        # Unique agent ID
+    agent_name: str                # Agent display name
+    description: str               # Agent description
+    created_at: int                # Creation time (epoch ms)
+    registration_token: str = ""   # Token for agent registration
+    last_verified_at: int = 0      # Last verification time (epoch ms)
 ```
 
 ### `VerificationResult`
@@ -244,7 +344,8 @@ with TetherClient(credential_id="...", private_key_path="...") as client:
 ## 🛡️ Security Notes
 
 - **Private Key Security**: Never commit private keys to version control or share them publicly
-- **Key Format**: Tether requires RSA-2048 keys. Other key sizes will be rejected  
+- **API Key Security**: API keys are hashed before storage. The `tether_sk_` prefix enables leak detection. Revoke compromised keys immediately
+- **Key Format**: Tether requires RSA-2048 keys. Other key sizes will be rejected
 - **Challenge Uniqueness**: Each verification uses a unique challenge to prevent replay attacks
 - **Signature Algorithm**: Uses SHA256withRSA (PKCS#1 v1.5 padding) as specified by Tether
 
