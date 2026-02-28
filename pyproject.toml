@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tether-name"
-version = "1.0.4"
+version = "1.0.5"
 description = "Official Python SDK for Tether.name - AI agent identity verification"
 readme = "README.md"
 license = {file = "LICENSE"}
