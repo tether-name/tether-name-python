@@ -402,6 +402,7 @@ class TetherClient:
                 f"{self.base_url}/credentials/{agent_id}",
                 headers=self._auth_headers()
             )
+            response.raise_for_status()
             return response.status_code == 200
 
         except httpx.HTTPStatusError as e:
