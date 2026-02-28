@@ -186,13 +186,21 @@ class TetherClient:
     def sign(self, challenge: str) -> str:
         """
         Sign a challenge with the private key.
-        
+
         Args:
             challenge: The challenge string to sign
-            
+
         Returns:
             str: The signature as URL-safe base64 (no padding)
+
+        Raises:
+            TetherError: If no private key is available
         """
+        if self.private_key is None:
+            raise TetherError(
+                "Private key is required for signing. Provide private_key_path "
+                "or private_key_der when creating the client."
+            )
         return sign_challenge(self.private_key, challenge)
     
     def submit_proof(self, challenge: str, proof: str) -> VerificationResult:
