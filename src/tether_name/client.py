@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Union
 
@@ -248,7 +248,7 @@ class TetherClient:
                     raw = data["registeredSince"]
                     if isinstance(raw, (int, float)):
                         registered_since = datetime.fromtimestamp(
-                            raw / 1000.0, tz=None
+                            raw / 1000.0, tz=timezone.utc
                         )
                     elif isinstance(raw, str):
                         registered_since = datetime.fromisoformat(
