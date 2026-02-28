@@ -60,7 +60,6 @@ class TetherClient:
         private_key_path: Optional[Union[str, Path]] = None,
         private_key_pem: Optional[Union[str, bytes]] = None,
         private_key_der: Optional[bytes] = None,
-        base_url: str = "https://api.tether.name",
         timeout: float = 30.0,
         api_key: Optional[str] = None,
     ) -> None:
@@ -72,7 +71,6 @@ class TetherClient:
             private_key_path: Path to private key file (or set TETHER_PRIVATE_KEY_PATH)
             private_key_pem: Private key as PEM string/bytes
             private_key_der: Private key as DER bytes
-            base_url: Base URL for the Tether API
             timeout: Request timeout in seconds
             api_key: API key for management operations (or set TETHER_API_KEY)
 
@@ -128,7 +126,7 @@ class TetherClient:
                 key_der=private_key_der
             )
 
-        self.base_url = base_url.rstrip('/')
+        self.base_url = 'https://api.tether.name'
         self.timeout = timeout
 
         # Create HTTP client

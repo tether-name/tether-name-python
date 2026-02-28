@@ -151,7 +151,6 @@ TetherClient(
     private_key_path: Optional[Union[str, Path]] = None,
     private_key_pem: Optional[Union[str, bytes]] = None,
     private_key_der: Optional[bytes] = None,
-    base_url: str = "https://api.tether.name",
     timeout: float = 30.0,
     api_key: Optional[str] = None
 )
