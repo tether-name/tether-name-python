@@ -24,7 +24,7 @@ from tether_name import TetherClient
 # Initialize with your credentials
 client = TetherClient(
     credential_id="your-credential-id",
-    private_key_path="/path/to/your/private-key.der"
+    private_key_path="/path/to/your/private-key.pem"
 )
 
 # Verify your agent's identity
@@ -80,7 +80,7 @@ client = TetherClient(api_key="sk-tether-name-...")
 ```python
 client = TetherClient(
     credential_id="your-credential-id",
-    private_key_path="/path/to/key.der"
+    private_key_path="/path/to/key.pem"
 )
 ```
 
@@ -90,7 +90,7 @@ client = TetherClient(
 client = TetherClient(
     api_key="sk-tether-name-...",
     credential_id="your-credential-id",
-    private_key_path="/path/to/key.der"
+    private_key_path="/path/to/key.pem"
 )
 ```
 
@@ -101,7 +101,7 @@ Set these environment variables to avoid hardcoding credentials:
 ```bash
 export TETHER_API_KEY="sk-tether-name-..."
 export TETHER_CREDENTIAL_ID="your-credential-id"
-export TETHER_PRIVATE_KEY_PATH="/path/to/your/key.der"
+export TETHER_PRIVATE_KEY_PATH="/path/to/your/key.pem"
 ```
 
 Then initialize without parameters:
@@ -118,7 +118,7 @@ The SDK supports multiple private key formats:
 # From file path (PEM or DER)
 client = TetherClient(
     credential_id="...",
-    private_key_path="/path/to/key.der"
+    private_key_path="/path/to/key.pem"
 )
 
 # From PEM string
@@ -279,7 +279,7 @@ from tether_name import TetherClient, TetherAPIError, TetherVerificationError
 try:
     client = TetherClient(
         credential_id="your-credential-id",
-        private_key_path="/path/to/key.der"
+        private_key_path="/path/to/key.pem"
     )
     
     # Step 1: Request a challenge

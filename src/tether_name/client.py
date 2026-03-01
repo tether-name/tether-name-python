@@ -49,7 +49,7 @@ class TetherClient:
     Example:
         >>> client = TetherClient(
         ...     credential_id="your-credential-id",
-        ...     private_key_path="/path/to/key.der"
+        ...     private_key_path="/path/to/key.pem"
         ... )
         >>> result = client.verify()
         >>> if result.verified:
