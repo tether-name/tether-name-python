@@ -27,7 +27,7 @@ def keypair(tmp_path):
 
 @pytest.fixture
 def client(keypair):
-    """Create a TetherClient with test agent credentials."""
+    """Create a TetherClient with test agent identity."""
     key_path, _, _ = keypair
     return TetherClient(
         agent_id="test-agent-id",
