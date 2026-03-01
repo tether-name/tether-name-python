@@ -21,9 +21,9 @@ pip install tether-name
 ```python
 from tether_name import TetherClient
 
-# Initialize with your credentials
+# Initialize with your agents
 client = TetherClient(
-    credential_id="your-credential-id",
+    agent_id="your-agent-id",
     private_key_path="/path/to/your/private-key.pem"
 )
 
@@ -57,7 +57,7 @@ client.delete_agent(agent.id)
 
 Tether.name provides cryptographic identity verification for AI agents through a simple 3-step process:
 
-1. **Register**: Create an agent identity at [tether.name](https://tether.name) and get your credential ID and RSA-2048 private key
+1. **Register**: Create an agent identity at [tether.name](https://tether.name) and get your agent ID and RSA-2048 private key
 2. **Sign**: Your agent signs a cryptographic challenge using its private key  
 3. **Verify**: The signature proves your agent's identity to others
 
@@ -79,7 +79,7 @@ client = TetherClient(api_key="sk-tether-name-...")
 
 ```python
 client = TetherClient(
-    credential_id="your-credential-id",
+    agent_id="your-agent-id",
     private_key_path="/path/to/key.pem"
 )
 ```
@@ -89,18 +89,18 @@ client = TetherClient(
 ```python
 client = TetherClient(
     api_key="sk-tether-name-...",
-    credential_id="your-credential-id",
+    agent_id="your-agent-id",
     private_key_path="/path/to/key.pem"
 )
 ```
 
 ### Environment Variables
 
-Set these environment variables to avoid hardcoding credentials:
+Set these environment variables to avoid hardcoding secrets:
 
 ```bash
 export TETHER_API_KEY="sk-tether-name-..."
-export TETHER_CREDENTIAL_ID="your-credential-id"
+export TETHER_AGENT_ID="your-agent-id"
 export TETHER_PRIVATE_KEY_PATH="/path/to/your/key.pem"
 ```
 
@@ -117,13 +117,13 @@ The SDK supports multiple private key formats:
 ```python
 # From file path (PEM or DER)
 client = TetherClient(
-    credential_id="...",
+    agent_id="...",
     private_key_path="/path/to/key.pem"
 )
 
 # From PEM string
 client = TetherClient(
-    credential_id="...",
+    agent_id="...",
     private_key_pem="-----BEGIN PRIVATE KEY-----\n..."
 )
 
@@ -132,7 +132,7 @@ with open("key.der", "rb") as f:
     key_bytes = f.read()
 
 client = TetherClient(
-    credential_id="...",
+    agent_id="...",
     private_key_der=key_bytes
 )
 ```
@@ -147,7 +147,7 @@ Main client for Tether.name API interactions.
 
 ```python
 TetherClient(
-    credential_id: Optional[str] = None,
+    agent_id: Optional[str] = None,
     private_key_path: Optional[Union[str, Path]] = None,
     private_key_pem: Optional[Union[str, bytes]] = None,
     private_key_der: Optional[bytes] = None,
@@ -159,12 +159,12 @@ TetherClient(
 | Parameter | Env var | Description |
 |---|---|---|
 | `api_key` | `TETHER_API_KEY` | API key for agent management operations |
-| `credential_id` | `TETHER_CREDENTIAL_ID` | Credential ID for identity verification |
+| `agent_id` | `TETHER_AGENT_ID` | Agent ID for identity verification |
 | `private_key_path` | `TETHER_PRIVATE_KEY_PATH` | Path to RSA-2048 private key (PEM or DER) |
 | `private_key_pem` | — | PEM-encoded private key string |
 | `private_key_der` | — | DER-encoded private key bytes |
 
-When `api_key` is set, `credential_id` and private key parameters become optional (only needed for verify/sign operations).
+When `api_key` is set, `agent_id` and private key parameters become optional (only needed for verify/sign operations).
 
 #### Methods
 
@@ -278,7 +278,7 @@ from tether_name import TetherClient, TetherAPIError, TetherVerificationError
 
 try:
     client = TetherClient(
-        credential_id="your-credential-id",
+        agent_id="your-agent-id",
         private_key_path="/path/to/key.pem"
     )
     
@@ -334,7 +334,7 @@ pytest --cov=tether_name
 Use TetherClient as a context manager for automatic cleanup:
 
 ```python
-with TetherClient(credential_id="...", private_key_path="...") as client:
+with TetherClient(agent_id="...", private_key_path="...") as client:
     result = client.verify()
     print(f"Verified: {result.verified}")
 # HTTP client automatically closed

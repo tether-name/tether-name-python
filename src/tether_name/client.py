@@ -48,7 +48,7 @@ class TetherClient:
     
     Example:
         >>> client = TetherClient(
-        ...     credential_id="your-credential-id",
+        ...     agent_id="your-agent-id",
         ...     private_key_path="/path/to/key.pem"
         ... )
         >>> result = client.verify()
@@ -58,7 +58,7 @@ class TetherClient:
     
     def __init__(
         self,
-        credential_id: Optional[str] = None,
+        agent_id: Optional[str] = None,
         private_key_path: Optional[Union[str, Path]] = None,
         private_key_pem: Optional[Union[str, bytes]] = None,
         private_key_der: Optional[bytes] = None,
@@ -69,7 +69,7 @@ class TetherClient:
         Initialize the Tether client.
 
         Args:
-            credential_id: Your Tether credential ID (or set TETHER_CREDENTIAL_ID)
+            agent_id: Your Tether agent ID (or set TETHER_AGENT_ID)
             private_key_path: Path to private key file (or set TETHER_PRIVATE_KEY_PATH)
             private_key_pem: Private key as PEM string/bytes
             private_key_der: Private key as DER bytes
@@ -82,8 +82,8 @@ class TetherClient:
         # Get API key from parameter or environment
         self.api_key = api_key or os.getenv("TETHER_API_KEY") or None
 
-        # Get credential ID from parameter or environment
-        self.credential_id = credential_id or os.getenv("TETHER_CREDENTIAL_ID") or None
+        # Get agent ID from parameter or environment
+        self.agent_id = agent_id or os.getenv("TETHER_AGENT_ID") or None
 
         # Get private key from parameters or environment
         has_private_key = (
@@ -94,7 +94,7 @@ class TetherClient:
         )
 
         if self.api_key:
-            # API key mode: credential_id and private_key are optional
+            # API key mode: agent_id and private_key are optional
             self.private_key: Optional[RSAPrivateKey] = None
             if has_private_key:
                 if private_key_path is None and private_key_pem is None and private_key_der is None:
@@ -105,11 +105,11 @@ class TetherClient:
                     key_der=private_key_der
                 )
         else:
-            # No API key: require credential_id and private_key (existing behavior)
-            if not self.credential_id:
+            # No API key: require agent_id and private_key (existing behavior)
+            if not self.agent_id:
                 raise TetherError(
-                    "credential_id is required. Provide it directly or set "
-                    "TETHER_CREDENTIAL_ID environment variable"
+                    "agent_id is required. Provide it directly or set "
+                    "TETHER_AGENT_ID environment variable"
                 )
 
             if not has_private_key:
@@ -222,7 +222,7 @@ class TetherClient:
             payload = {
                 "challenge": challenge,
                 "proof": proof,
-                "credentialId": self.credential_id
+                "agentId": self.agent_id
             }
             
             response = self._client.post(
@@ -321,7 +321,7 @@ class TetherClient:
         """
         try:
             response = self._client.post(
-                f"{self.base_url}/credentials/issue",
+                f"{self.base_url}/agents/issue",
                 json={"agentName": agent_name, "description": description},
                 headers=self._auth_headers()
             )
@@ -359,7 +359,7 @@ class TetherClient:
         """
         try:
             response = self._client.get(
-                f"{self.base_url}/credentials",
+                f"{self.base_url}/agents",
                 headers=self._auth_headers()
             )
             response.raise_for_status()
@@ -399,7 +399,7 @@ class TetherClient:
         """
         try:
             response = self._client.delete(
-                f"{self.base_url}/credentials/{agent_id}",
+                f"{self.base_url}/agents/{agent_id}",
                 headers=self._auth_headers()
             )
             response.raise_for_status()

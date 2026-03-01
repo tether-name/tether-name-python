@@ -7,7 +7,7 @@ digital signatures. This package provides a simple interface to the Tether.name 
 Example:
     >>> from tether_name import TetherClient
     >>> client = TetherClient(
-    ...     credential_id="your-credential-id",
+    ...     agent_id="your-agent-id",
     ...     private_key_path="/path/to/key.pem"
     ... )
     >>> result = client.verify()

@@ -27,10 +27,10 @@ def keypair(tmp_path):
 
 @pytest.fixture
 def client(keypair):
-    """Create a TetherClient with test credentials."""
+    """Create a TetherClient with test agent credentials."""
     key_path, _, _ = keypair
     return TetherClient(
-        credential_id="test-credential-id",
+        agent_id="test-agent-id",
         private_key_path=key_path,
     )
 
@@ -40,7 +40,7 @@ def api_client(keypair):
     """Create a TetherClient with API key for management operations."""
     key_path, _, _ = keypair
     return TetherClient(
-        credential_id="test-credential-id",
+        agent_id="test-agent-id",
         private_key_path=key_path,
         api_key="test-api-key",
     )
@@ -81,7 +81,7 @@ class TestRequestChallenge:
 
 
 class TestSubmitProof:
-    def test_posts_proof_with_credential_id(self, client):
+    def test_posts_proof_with_agent_id(self, client):
         resp_data = {
             "valid": True,
             "agentName": "Test Agent",
@@ -99,7 +99,7 @@ class TestSubmitProof:
             body = call_kwargs[1].get("json") or json.loads(call_kwargs[1].get("content", "{}"))
             assert body["challenge"] == "challenge-code"
             assert body["proof"] == "proof-sig"
-            assert body["credentialId"] == "test-credential-id"
+            assert body["agentId"] == "test-agent-id"
 
     def test_raises_on_http_error(self, client):
         with patch.object(client._client, "post", return_value=mock_response({"error": "bad"}, 401)):
@@ -151,7 +151,7 @@ class TestVerify:
 
 
 class TestCreateAgent:
-    def test_posts_to_credentials_issue(self, api_client):
+    def test_posts_to_agents_issue(self, api_client):
         resp_data = {
             "id": "agent-123",
             "agentName": "New Bot",
@@ -167,7 +167,7 @@ class TestCreateAgent:
             assert agent.registration_token == "reg-token-xyz"
             
             url = mock_post.call_args[0][0]
-            assert "/credentials/issue" in url
+            assert "/agents/issue" in url
             
             # Check auth header
             headers = mock_post.call_args[1].get("headers", {})
@@ -186,7 +186,7 @@ class TestCreateAgent:
 
 
 class TestListAgents:
-    def test_gets_credentials(self, api_client):
+    def test_gets_agents(self, api_client):
         agents_data = [
             {"id": "a1", "agentName": "Bot 1", "description": "", "createdAt": 1700000000000},
             {"id": "a2", "agentName": "Bot 2", "description": "helper", "createdAt": 1700000001000},
@@ -199,7 +199,7 @@ class TestListAgents:
             assert agents[1].agent_name == "Bot 2"
             
             url = mock_get.call_args[0][0]
-            assert "/credentials" in url
+            assert "/agents" in url
             
             headers = mock_get.call_args[1].get("headers", {})
             assert headers.get("Authorization") == "Bearer test-api-key"
@@ -212,7 +212,7 @@ class TestListAgents:
 
 
 class TestDeleteAgent:
-    def test_deletes_credential(self, api_client):
+    def test_deletes_agent(self, api_client):
         resp = mock_response({})
         resp.status_code = 200
         with patch.object(api_client._client, "delete", return_value=resp) as mock_del:
@@ -221,7 +221,7 @@ class TestDeleteAgent:
             assert result is True
             
             url = mock_del.call_args[0][0]
-            assert "/credentials/agent-to-delete" in url
+            assert "/agents/agent-to-delete" in url
             
             headers = mock_del.call_args[1].get("headers", {})
             assert headers.get("Authorization") == "Bearer test-api-key"
