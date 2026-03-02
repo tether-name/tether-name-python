@@ -9,10 +9,10 @@ description = "Official Python SDK for Tether.name - AI agent identity verificat
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [
-    {name = "Commit 451", email = "jawnnypoo@gmail.com"},
+    {name = "Commit 451", email = "hello@tether.name"},
 ]
 maintainers = [
-    {name = "Commit 451", email = "jawnnypoo@gmail.com"},
+    {name = "Commit 451", email = "hello@tether.name"},
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",

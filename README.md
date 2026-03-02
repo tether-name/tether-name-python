@@ -447,7 +447,7 @@ Contributions welcome! Please see the [GitHub repository](https://github.com/tet
 - **📦 PyPI Package**: [https://pypi.org/project/tether-name/](https://pypi.org/project/tether-name/)
 - **💻 Source Code**: [https://github.com/tether-name/tether-name-python](https://github.com/tether-name/tether-name-python)
 - **📖 API Documentation**: [https://docs.tether.name](https://docs.tether.name)
-- **❓ Support**: [jawnnypoo@gmail.com](mailto:jawnnypoo@gmail.com)
+- **❓ Support**: [security@tether.name](mailto:security@tether.name)
 
 ---
 
