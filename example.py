@@ -57,7 +57,7 @@ def main():
     print("\n4️⃣  Testing TetherClient initialization...")
     try:
         client = TetherClient(
-            credential_id="test-credential-id",
+            agent_id="test-agent-id",
             private_key_path=temp_key_path
         )
         print("   ✅ TetherClient initialized successfully")
@@ -75,10 +75,10 @@ def main():
     Path(temp_key_path).unlink()
     
     print("\n🎉 All tests completed successfully!")
-    print("\n📚 To use with real Tether credentials:")
+    print("\n📚 To use with real Tether agents:")
     print("   1. Register at https://tether.name")
     print("   2. Download your private key")
-    print("   3. Set TETHER_CREDENTIAL_ID and TETHER_PRIVATE_KEY_PATH")
+    print("   3. Set TETHER_AGENT_ID and TETHER_PRIVATE_KEY_PATH")
     print("   4. Call client.verify() to get verified identity")
 
 
