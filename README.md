@@ -48,8 +48,9 @@ from tether_name import TetherClient
 client = TetherClient(api_key="sk-tether-name-...")
 
 # Create, list, and delete agents
-agent = client.create_agent("my-bot")
+agent = client.create_agent("my-bot", domain_id="verified-domain-id")
 agents = client.list_agents()
+domains = client.list_domains()
 client.delete_agent(agent.id)
 ```
 
@@ -209,12 +210,12 @@ signature = client.sign(challenge)
 result = client.submit_proof(challenge, signature)
 ```
 
-##### `create_agent(agent_name: str, description: str = "") -> Agent`
+##### `create_agent(agent_name: str, description: str = "", domain_id: str = "") -> Agent`
 
-Create a new agent. Requires API key authentication.
+Create a new agent. Requires API key authentication. `domain_id` is optional and assigns this agent to a verified domain.
 
 ```python
-agent = client.create_agent("my-bot", description="My automated agent")
+agent = client.create_agent("my-bot", description="My automated agent", domain_id="verified-domain-id")
 print(agent.id)                # Agent ID
 print(agent.agent_name)        # "my-bot"
 print(agent.registration_token) # Token for agent registration
@@ -228,6 +229,16 @@ List all agents. Requires API key authentication.
 agents = client.list_agents()
 for agent in agents:
     print(f"{agent.agent_name} (created {agent.created_at})")
+```
+
+##### `list_domains() -> list[Domain]`
+
+List all registered domains for the account. Requires API key authentication.
+
+```python
+domains = client.list_domains()
+for domain in domains:
+    print(domain.domain, domain.verified)
 ```
 
 ##### `delete_agent(agent_id: str) -> bool`
@@ -248,9 +259,22 @@ class Agent:
     id: str                        # Unique agent ID
     agent_name: str                # Agent display name
     description: str               # Agent description
+    domain_id: str = ""            # Optional assigned domain ID
+    domain: Optional[str] = None   # Resolved domain name
     created_at: int                # Creation time (epoch ms)
     registration_token: str = ""   # Token for agent registration
     last_verified_at: int = 0      # Last verification time (epoch ms)
+```
+
+```python
+@dataclass
+class Domain:
+    id: str
+    domain: str
+    verified: bool
+    verified_at: int = 0
+    last_checked_at: int = 0
+    created_at: int = 0
 ```
 
 ### `VerificationResult`
@@ -264,6 +288,7 @@ class VerificationResult:
     agent_name: Optional[str] = None         # Agent's display name
     verify_url: Optional[str] = None         # Public verification URL
     email: Optional[str] = None              # Registered email
+    domain: Optional[str] = None             # Verified domain (if assigned)
     registered_since: Optional[datetime] = None  # Registration date
     error: Optional[str] = None              # Error message if failed
     challenge: Optional[str] = None          # Original challenge

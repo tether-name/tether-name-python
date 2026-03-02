@@ -5,7 +5,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 from cryptography.hazmat.primitives import serialization
 
-from tether_name.client import TetherClient, Agent, VerificationResult
+from tether_name.client import TetherClient, Agent, Domain, VerificationResult
 from tether_name.exceptions import TetherAPIError, TetherVerificationError
 from tether_name.crypto import generate_test_keypair
 
@@ -156,18 +156,23 @@ class TestCreateAgent:
             "id": "agent-123",
             "agentName": "New Bot",
             "description": "A test bot",
+            "domainId": "domain-123",
             "createdAt": 1700000000000,
             "registrationToken": "reg-token-xyz",
         }
         with patch.object(api_client._client, "post", return_value=mock_response(resp_data)) as mock_post:
-            agent = api_client.create_agent("New Bot", "A test bot")
+            agent = api_client.create_agent("New Bot", "A test bot", "domain-123")
             
             assert agent.id == "agent-123"
             assert agent.agent_name == "New Bot"
             assert agent.registration_token == "reg-token-xyz"
+            assert agent.domain_id == "domain-123"
             
             url = mock_post.call_args[0][0]
             assert "/agents/issue" in url
+
+            payload = mock_post.call_args[1].get("json", {})
+            assert payload.get("domainId") == "domain-123"
             
             # Check auth header
             headers = mock_post.call_args[1].get("headers", {})
@@ -188,7 +193,7 @@ class TestCreateAgent:
 class TestListAgents:
     def test_gets_agents(self, api_client):
         agents_data = [
-            {"id": "a1", "agentName": "Bot 1", "description": "", "createdAt": 1700000000000},
+            {"id": "a1", "agentName": "Bot 1", "description": "", "createdAt": 1700000000000, "domainId": "d1", "domain": "example.com"},
             {"id": "a2", "agentName": "Bot 2", "description": "helper", "createdAt": 1700000001000},
         ]
         with patch.object(api_client._client, "get", return_value=mock_response(agents_data)) as mock_get:
@@ -196,6 +201,8 @@ class TestListAgents:
             
             assert len(agents) == 2
             assert agents[0].agent_name == "Bot 1"
+            assert agents[0].domain_id == "d1"
+            assert agents[0].domain == "example.com"
             assert agents[1].agent_name == "Bot 2"
             
             url = mock_get.call_args[0][0]
@@ -209,6 +216,33 @@ class TestListAgents:
         with patch.object(client._client, "get", return_value=mock_response({"error": "Unauthorized"}, 401)):
             with pytest.raises(TetherAPIError):
                 client.list_agents()
+
+
+class TestListDomains:
+    def test_gets_domains(self, api_client):
+        domains_data = [
+            {"id": "d1", "domain": "example.com", "verified": True, "verifiedAt": 1700000000000, "lastCheckedAt": 1700001000000, "createdAt": 1699999000000},
+            {"id": "d2", "domain": "example.org", "verified": False, "verifiedAt": 0, "lastCheckedAt": 0, "createdAt": 1699998000000},
+        ]
+        with patch.object(api_client._client, "get", return_value=mock_response(domains_data)) as mock_get:
+            domains = api_client.list_domains()
+
+            assert len(domains) == 2
+            assert domains[0].domain == "example.com"
+            assert domains[0].verified is True
+            assert domains[1].domain == "example.org"
+
+            url = mock_get.call_args[0][0]
+            assert "/domains" in url
+
+            headers = mock_get.call_args[1].get("headers", {})
+            assert headers.get("Authorization") == "Bearer test-api-key"
+
+    def test_sends_unauthenticated_without_api_key(self, client):
+        """Without API key, list_domains sends unauthenticated (server returns 401)."""
+        with patch.object(client._client, "get", return_value=mock_response({"error": "Unauthorized"}, 401)):
+            with pytest.raises(TetherAPIError):
+                client.list_domains()
 
 
 class TestDeleteAgent:

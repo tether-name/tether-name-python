@@ -25,6 +25,7 @@ class VerificationResult:
     agent_name: Optional[str] = None
     verify_url: Optional[str] = None
     email: Optional[str] = None
+    domain: Optional[str] = None
     registered_since: Optional[datetime] = None
     error: Optional[str] = None
     challenge: Optional[str] = None
@@ -37,9 +38,23 @@ class Agent:
     id: str
     agent_name: str
     description: str
-    created_at: int  # epoch ms
+    domain_id: str = ""
+    domain: Optional[str] = None
+    created_at: int = 0  # epoch ms
     registration_token: str = ""
     last_verified_at: int = 0
+
+
+@dataclass
+class Domain:
+    """A domain claimed under a Tether account."""
+
+    id: str
+    domain: str
+    verified: bool
+    verified_at: int = 0
+    last_checked_at: int = 0
+    created_at: int = 0
 
 
 class TetherClient:
@@ -262,6 +277,7 @@ class TetherClient:
                 agent_name=data.get("agentName"),
                 verify_url=data.get("verifyUrl"),
                 email=data.get("email"),
+                domain=data.get("domain"),
                 registered_since=registered_since,
                 challenge=challenge
             )
@@ -303,7 +319,7 @@ class TetherClient:
                 raise
             raise TetherError(f"Verification failed: {e}")
 
-    def create_agent(self, agent_name: str, description: str = "") -> Agent:
+    def create_agent(self, agent_name: str, description: str = "", domain_id: str = "") -> Agent:
         """
         Create a new agent.
 
@@ -312,6 +328,7 @@ class TetherClient:
         Args:
             agent_name: Name for the agent
             description: Optional description
+            domain_id: Optional verified domain ID to assign to this agent
 
         Returns:
             Agent: The newly created agent
@@ -320,9 +337,13 @@ class TetherClient:
             TetherAPIError: If the API request fails
         """
         try:
+            payload = {"agentName": agent_name, "description": description}
+            if domain_id:
+                payload["domainId"] = domain_id
+
             response = self._client.post(
                 f"{self.base_url}/agents/issue",
-                json={"agentName": agent_name, "description": description},
+                json=payload,
                 headers=self._auth_headers()
             )
             response.raise_for_status()
@@ -332,6 +353,7 @@ class TetherClient:
                 id=data["id"],
                 agent_name=data["agentName"],
                 description=data.get("description", ""),
+                domain_id=data.get("domainId", ""),
                 created_at=data["createdAt"],
                 registration_token=data.get("registrationToken", "")
             )
@@ -369,7 +391,9 @@ class TetherClient:
                 id=c["id"],
                 agent_name=c["agentName"],
                 description=c.get("description", ""),
-                created_at=c.get("issuedAt", 0),
+                domain_id=c.get("domainId", ""),
+                domain=c.get("domain"),
+                created_at=c.get("createdAt", c.get("issuedAt", 0)),
                 last_verified_at=c.get("lastVerifiedAt", 0)
             ) for c in data]
 
@@ -381,6 +405,44 @@ class TetherClient:
             )
         except httpx.RequestError as e:
             raise TetherAPIError(f"List agents failed: {e}")
+
+    def list_domains(self) -> list[Domain]:
+        """
+        List all registered domains for the authenticated account.
+
+        Requires API key or JWT auth.
+
+        Returns:
+            list[Domain]: All domains
+
+        Raises:
+            TetherAPIError: If the API request fails
+        """
+        try:
+            response = self._client.get(
+                f"{self.base_url}/domains",
+                headers=self._auth_headers()
+            )
+            response.raise_for_status()
+
+            data = response.json()
+            return [Domain(
+                id=d["id"],
+                domain=d["domain"],
+                verified=d.get("verified", False),
+                verified_at=d.get("verifiedAt", 0),
+                last_checked_at=d.get("lastCheckedAt", 0),
+                created_at=d.get("createdAt", 0),
+            ) for d in data]
+
+        except httpx.HTTPStatusError as e:
+            raise TetherAPIError(
+                f"List domains failed: {e.response.status_code}",
+                e.response.status_code,
+                e.response.text
+            )
+        except httpx.RequestError as e:
+            raise TetherAPIError(f"List domains failed: {e}")
 
     def delete_agent(self, agent_id: str) -> bool:
         """
