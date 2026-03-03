@@ -52,6 +52,22 @@ agent = client.create_agent("my-bot", domain_id="verified-domain-id")
 agents = client.list_agents()
 domains = client.list_domains()
 client.delete_agent(agent.id)
+
+# Key lifecycle operations
+keys = client.list_agent_keys(agent.id)
+rotated = client.rotate_agent_key(
+    agent.id,
+    public_key="BASE64_SPKI_PUBLIC_KEY",
+    grace_period_hours=24,
+    reason="routine_rotation",
+    step_up_code="123456",  # or challenge+proof
+)
+client.revoke_agent_key(
+    agent.id,
+    rotated.new_key_id,
+    reason="compromised",
+    step_up_code="654321",  # or challenge+proof
+)
 ```
 
 ## 📖 How Tether Works
@@ -249,6 +265,38 @@ Delete an agent. Requires API key authentication.
 client.delete_agent("agent-id-here")
 ```
 
+##### `list_agent_keys(agent_id: str) -> list[AgentKey]`
+
+List key lifecycle entries (`active`, `grace`, `revoked`) for an agent. Requires API key authentication.
+
+##### `rotate_agent_key(...) -> RotateKeyResult`
+
+Rotate an agent key. Requires API key auth plus step-up verification via either:
+- `step_up_code` (email code), or
+- `challenge` + `proof` signed by a current key.
+
+```python
+result = client.rotate_agent_key(
+    "agent-id",
+    public_key="BASE64_SPKI_PUBLIC_KEY",
+    grace_period_hours=24,
+    step_up_code="123456",
+)
+```
+
+##### `revoke_agent_key(...) -> RevokeKeyResult`
+
+Revoke an agent key with the same step-up requirements as rotate.
+
+```python
+result = client.revoke_agent_key(
+    "agent-id",
+    "key-id",
+    reason="compromised",
+    step_up_code="123456",
+)
+```
+
 ### `Agent`
 
 Agent object returned by management operations.
@@ -275,6 +323,18 @@ class Domain:
     verified_at: int = 0
     last_checked_at: int = 0
     created_at: int = 0
+```
+
+```python
+@dataclass
+class AgentKey:
+    id: str
+    status: str
+    created_at: int
+    activated_at: int
+    grace_until: int
+    revoked_at: int
+    revoked_reason: str = ""
 ```
 
 ### `VerificationResult`

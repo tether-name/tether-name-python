@@ -57,6 +57,41 @@ class Domain:
     created_at: int = 0
 
 
+@dataclass
+class AgentKey:
+    """Agent key lifecycle entry."""
+
+    id: str
+    status: str
+    created_at: int
+    activated_at: int
+    grace_until: int
+    revoked_at: int
+    revoked_reason: str = ""
+
+
+@dataclass
+class RotateKeyResult:
+    """Result of rotating an agent key."""
+
+    agent_id: str
+    previous_key_id: Optional[str]
+    new_key_id: str
+    grace_until: int
+    message: str
+
+
+@dataclass
+class RevokeKeyResult:
+    """Result of revoking an agent key."""
+
+    agent_id: str
+    key_id: str
+    revoked: bool
+    promoted_key_id: Optional[str]
+    message: str
+
+
 class TetherClient:
     """
     Client for interacting with the Tether.name API.
@@ -475,3 +510,128 @@ class TetherClient:
             )
         except httpx.RequestError as e:
             raise TetherAPIError(f"Delete agent failed: {e}")
+
+    def list_agent_keys(self, agent_id: str) -> list[AgentKey]:
+        """List key lifecycle entries for an agent."""
+        try:
+            response = self._client.get(
+                f"{self.base_url}/agents/{agent_id}/keys",
+                headers=self._auth_headers(),
+            )
+            response.raise_for_status()
+
+            data = response.json()
+            return [
+                AgentKey(
+                    id=k["id"],
+                    status=k.get("status", ""),
+                    created_at=k.get("createdAt", 0),
+                    activated_at=k.get("activatedAt", 0),
+                    grace_until=k.get("graceUntil", 0),
+                    revoked_at=k.get("revokedAt", 0),
+                    revoked_reason=k.get("revokedReason", ""),
+                )
+                for k in data
+            ]
+        except httpx.HTTPStatusError as e:
+            raise TetherAPIError(
+                f"List agent keys failed: {e.response.status_code}",
+                e.response.status_code,
+                e.response.text,
+            )
+        except httpx.RequestError as e:
+            raise TetherAPIError(f"List agent keys failed: {e}")
+
+    def rotate_agent_key(
+        self,
+        agent_id: str,
+        public_key: str,
+        grace_period_hours: int = 24,
+        reason: str = "",
+        *,
+        step_up_code: str = "",
+        challenge: str = "",
+        proof: str = "",
+    ) -> RotateKeyResult:
+        """Rotate an agent public key with step-up authentication inputs."""
+        payload = {
+            "publicKey": public_key,
+            "gracePeriodHours": grace_period_hours,
+        }
+        if reason:
+            payload["reason"] = reason
+        if step_up_code:
+            payload["stepUpCode"] = step_up_code
+        if challenge:
+            payload["challenge"] = challenge
+        if proof:
+            payload["proof"] = proof
+
+        try:
+            response = self._client.post(
+                f"{self.base_url}/agents/{agent_id}/keys/rotate",
+                json=payload,
+                headers=self._auth_headers(),
+            )
+            response.raise_for_status()
+            data = response.json()
+            return RotateKeyResult(
+                agent_id=data["agentId"],
+                previous_key_id=data.get("previousKeyId"),
+                new_key_id=data["newKeyId"],
+                grace_until=data.get("graceUntil", 0),
+                message=data.get("message", ""),
+            )
+        except httpx.HTTPStatusError as e:
+            raise TetherAPIError(
+                f"Rotate agent key failed: {e.response.status_code}",
+                e.response.status_code,
+                e.response.text,
+            )
+        except httpx.RequestError as e:
+            raise TetherAPIError(f"Rotate agent key failed: {e}")
+
+    def revoke_agent_key(
+        self,
+        agent_id: str,
+        key_id: str,
+        reason: str = "",
+        *,
+        step_up_code: str = "",
+        challenge: str = "",
+        proof: str = "",
+    ) -> RevokeKeyResult:
+        """Revoke an agent key with step-up authentication inputs."""
+        payload: dict[str, str] = {}
+        if reason:
+            payload["reason"] = reason
+        if step_up_code:
+            payload["stepUpCode"] = step_up_code
+        if challenge:
+            payload["challenge"] = challenge
+        if proof:
+            payload["proof"] = proof
+
+        try:
+            response = self._client.post(
+                f"{self.base_url}/agents/{agent_id}/keys/{key_id}/revoke",
+                json=payload,
+                headers=self._auth_headers(),
+            )
+            response.raise_for_status()
+            data = response.json()
+            return RevokeKeyResult(
+                agent_id=data["agentId"],
+                key_id=data["keyId"],
+                revoked=bool(data.get("revoked", False)),
+                promoted_key_id=data.get("promotedKeyId"),
+                message=data.get("message", ""),
+            )
+        except httpx.HTTPStatusError as e:
+            raise TetherAPIError(
+                f"Revoke agent key failed: {e.response.status_code}",
+                e.response.status_code,
+                e.response.text,
+            )
+        except httpx.RequestError as e:
+            raise TetherAPIError(f"Revoke agent key failed: {e}")

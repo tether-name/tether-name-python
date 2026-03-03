@@ -272,6 +272,73 @@ class TestDeleteAgent:
                 client.delete_agent("any-id")
 
 
+class TestAgentKeyLifecycle:
+    def test_lists_agent_keys(self, api_client):
+        keys_data = [
+            {
+                "id": "k1",
+                "status": "active",
+                "createdAt": 100,
+                "activatedAt": 100,
+                "graceUntil": 0,
+                "revokedAt": 0,
+                "revokedReason": "",
+            }
+        ]
+        with patch.object(api_client._client, "get", return_value=mock_response(keys_data)) as mock_get:
+            keys = api_client.list_agent_keys("agent-1")
+            assert len(keys) == 1
+            assert keys[0].id == "k1"
+            assert keys[0].status == "active"
+
+            url = mock_get.call_args[0][0]
+            assert "/agents/agent-1/keys" in url
+
+    def test_rotates_agent_key_with_step_up_code(self, api_client):
+        data = {
+            "agentId": "agent-1",
+            "previousKeyId": "k-old",
+            "newKeyId": "k-new",
+            "graceUntil": 123456,
+            "message": "Key rotated successfully",
+        }
+        with patch.object(api_client._client, "post", return_value=mock_response(data)) as mock_post:
+            result = api_client.rotate_agent_key(
+                "agent-1",
+                "BASE64_KEY",
+                grace_period_hours=24,
+                reason="routine_rotation",
+                step_up_code="123456",
+            )
+
+            assert result.new_key_id == "k-new"
+            payload = mock_post.call_args[1]["json"]
+            assert payload["stepUpCode"] == "123456"
+            assert payload["publicKey"] == "BASE64_KEY"
+
+    def test_revokes_agent_key_with_challenge_proof(self, api_client):
+        data = {
+            "agentId": "agent-1",
+            "keyId": "k-new",
+            "revoked": True,
+            "promotedKeyId": "k-old",
+            "message": "Key revoked",
+        }
+        with patch.object(api_client._client, "post", return_value=mock_response(data)) as mock_post:
+            result = api_client.revoke_agent_key(
+                "agent-1",
+                "k-new",
+                reason="compromised",
+                challenge="challenge-code",
+                proof="signed-proof",
+            )
+
+            assert result.revoked is True
+            payload = mock_post.call_args[1]["json"]
+            assert payload["challenge"] == "challenge-code"
+            assert payload["proof"] == "signed-proof"
+
+
 class TestErrorHandling:
     def test_wraps_network_error(self, client):
         import httpx
