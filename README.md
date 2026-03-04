@@ -49,6 +49,10 @@ client = TetherClient(api_key="sk-tether-name-...")
 
 # Create, list, and delete agents
 agent = client.create_agent("my-bot", domain_id="verified-domain-id")
+# Switch verification display to account email
+client.update_agent_domain(agent.id, "")
+# Or switch to a verified domain
+client.update_agent_domain(agent.id, "verified-domain-id")
 agents = client.list_agents()
 domains = client.list_domains()
 client.delete_agent(agent.id)
@@ -263,6 +267,15 @@ Delete an agent. Requires bearer auth (JWT or API key).
 
 ```python
 client.delete_agent("agent-id-here")
+```
+
+##### `update_agent_domain(agent_id: str, domain_id: str = "") -> UpdateAgentResult`
+
+Update which identity is shown when an agent is verified. Pass a verified `domain_id` to show that domain, or pass an empty string (`""`) to show account email.
+
+```python
+client.update_agent_domain("agent-id-here", "verified-domain-id")
+client.update_agent_domain("agent-id-here", "")  # show account email
 ```
 
 ##### `list_agent_keys(agent_id: str) -> list[AgentKey]`

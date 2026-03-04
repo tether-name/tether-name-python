@@ -58,6 +58,16 @@ class Domain:
 
 
 @dataclass
+class UpdateAgentResult:
+    """Result of updating which identity an agent shows on verification."""
+
+    id: str
+    domain_id: str = ""
+    domain: Optional[str] = None
+    message: str = ""
+
+
+@dataclass
 class AgentKey:
     """Agent key lifecycle entry."""
 
@@ -510,6 +520,46 @@ class TetherClient:
             )
         except httpx.RequestError as e:
             raise TetherAPIError(f"Delete agent failed: {e}")
+
+    def update_agent_domain(self, agent_id: str, domain_id: str = "") -> UpdateAgentResult:
+        """
+        Update which identity is shown when an agent is verified.
+
+        Requires API key or JWT auth.
+
+        Args:
+            agent_id: ID of the agent to update
+            domain_id: Verified domain ID to show; pass empty string to show account email
+
+        Returns:
+            UpdateAgentResult: Updated identity-display settings
+
+        Raises:
+            TetherAPIError: If the API request fails
+        """
+        try:
+            response = self._client.patch(
+                f"{self.base_url}/agents/{agent_id}",
+                json={"domainId": domain_id},
+                headers=self._auth_headers(),
+            )
+            response.raise_for_status()
+
+            data = response.json()
+            return UpdateAgentResult(
+                id=data["id"],
+                domain_id=data.get("domainId", ""),
+                domain=data.get("domain"),
+                message=data.get("message", ""),
+            )
+        except httpx.HTTPStatusError as e:
+            raise TetherAPIError(
+                f"Update agent failed: {e.response.status_code}",
+                e.response.status_code,
+                e.response.text,
+            )
+        except httpx.RequestError as e:
+            raise TetherAPIError(f"Update agent failed: {e}")
 
     def list_agent_keys(self, agent_id: str) -> list[AgentKey]:
         """List key lifecycle entries for an agent."""

@@ -5,7 +5,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 from cryptography.hazmat.primitives import serialization
 
-from tether_name.client import TetherClient, Agent, Domain, VerificationResult
+from tether_name.client import TetherClient, Agent, Domain, VerificationResult, UpdateAgentResult
 from tether_name.exceptions import TetherAPIError, TetherVerificationError
 from tether_name.crypto import generate_test_keypair
 
@@ -270,6 +270,48 @@ class TestDeleteAgent:
         with patch.object(client._client, "delete", return_value=mock_response({"error": "Unauthorized"}, 401)):
             with pytest.raises(TetherAPIError):
                 client.delete_agent("any-id")
+
+
+class TestUpdateAgentDomain:
+    def test_patches_agent_domain(self, api_client):
+        data = {
+            "id": "agent-123",
+            "domainId": "domain-123",
+            "domain": "example.com",
+            "message": "updated",
+        }
+        with patch.object(api_client._client, "patch", return_value=mock_response(data)) as mock_patch:
+            result = api_client.update_agent_domain("agent-123", "domain-123")
+
+            assert isinstance(result, UpdateAgentResult)
+            assert result.id == "agent-123"
+            assert result.domain_id == "domain-123"
+            assert result.domain == "example.com"
+
+            url = mock_patch.call_args[0][0]
+            assert "/agents/agent-123" in url
+            payload = mock_patch.call_args[1].get("json", {})
+            assert payload.get("domainId") == "domain-123"
+            headers = mock_patch.call_args[1].get("headers", {})
+            assert headers.get("Authorization") == "Bearer test-api-key"
+
+    def test_can_revert_to_email(self, api_client):
+        data = {
+            "id": "agent-123",
+            "domainId": "",
+            "message": "updated",
+        }
+        with patch.object(api_client._client, "patch", return_value=mock_response(data)) as mock_patch:
+            result = api_client.update_agent_domain("agent-123")
+
+            assert result.domain_id == ""
+            payload = mock_patch.call_args[1].get("json", {})
+            assert payload.get("domainId") == ""
+
+    def test_sends_unauthenticated_without_api_key(self, client):
+        with patch.object(client._client, "patch", return_value=mock_response({"error": "Unauthorized"}, 401)):
+            with pytest.raises(TetherAPIError):
+                client.update_agent_domain("agent-123", "domain-123")
 
 
 class TestAgentKeyLifecycle:

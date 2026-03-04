@@ -19,6 +19,7 @@ from .client import (
     Agent,
     AgentKey,
     Domain,
+    UpdateAgentResult,
     RevokeKeyResult,
     RotateKeyResult,
     TetherClient,
@@ -44,6 +45,7 @@ __all__ = [
     "Agent",
     "Domain",
     "AgentKey",
+    "UpdateAgentResult",
     "RotateKeyResult",
     "RevokeKeyResult",
 
