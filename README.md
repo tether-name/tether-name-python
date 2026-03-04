@@ -21,7 +21,7 @@ pip install tether-name
 ```python
 from tether_name import TetherClient
 
-# Initialize with your agents
+# Initialize with your agent
 client = TetherClient(
     agent_id="your-agent-id",
     private_key_path="/path/to/your/private-key.pem"
@@ -74,7 +74,7 @@ client.revoke_agent_key(
 
 Tether.name provides cryptographic identity verification for AI agents through a simple 3-step process:
 
-1. **Register**: Create an agent identity at [tether.name](https://tether.name) and get your agent ID and RSA-2048 private key
+1. **Register**: Create an agent identity at [tether.name](https://tether.name) to get your agent ID, then generate your RSA-2048 keypair locally and register the public key
 2. **Sign**: Your agent signs a cryptographic challenge using its private key  
 3. **Verify**: The signature proves your agent's identity to others
 
@@ -86,7 +86,7 @@ This creates unforgeable digital identity that anyone can verify.
 
 The SDK supports two authentication modes:
 
-**API Key** — for agent management (create, list, delete):
+**Bearer token** — for management operations (JWT or API key):
 
 ```python
 client = TetherClient(api_key="sk-tether-name-...")
@@ -175,7 +175,7 @@ TetherClient(
 
 | Parameter | Env var | Description |
 |---|---|---|
-| `api_key` | `TETHER_API_KEY` | API key for agent management operations |
+| `api_key` | `TETHER_API_KEY` | Management bearer token (API key or JWT) |
 | `agent_id` | `TETHER_AGENT_ID` | Agent ID for identity verification |
 | `private_key_path` | `TETHER_PRIVATE_KEY_PATH` | Path to RSA-2048 private key (PEM or DER) |
 | `private_key_pem` | — | PEM-encoded private key string |
@@ -228,7 +228,7 @@ result = client.submit_proof(challenge, signature)
 
 ##### `create_agent(agent_name: str, description: str = "", domain_id: str = "") -> Agent`
 
-Create a new agent. Requires API key authentication. `domain_id` is optional and assigns this agent to a verified domain.
+Create a new agent. Requires bearer auth (JWT or API key). `domain_id` is optional and assigns this agent to a verified domain.
 
 ```python
 agent = client.create_agent("my-bot", description="My automated agent", domain_id="verified-domain-id")
@@ -239,7 +239,7 @@ print(agent.registration_token) # Token for agent registration
 
 ##### `list_agents() -> list[Agent]`
 
-List all agents. Requires API key authentication.
+List all agents. Requires bearer auth (JWT or API key).
 
 ```python
 agents = client.list_agents()
@@ -249,7 +249,7 @@ for agent in agents:
 
 ##### `list_domains() -> list[Domain]`
 
-List all registered domains for the account. Requires API key authentication.
+List all registered domains for the account. Requires bearer auth (JWT or API key).
 
 ```python
 domains = client.list_domains()
@@ -259,7 +259,7 @@ for domain in domains:
 
 ##### `delete_agent(agent_id: str) -> bool`
 
-Delete an agent. Requires API key authentication.
+Delete an agent. Requires bearer auth (JWT or API key).
 
 ```python
 client.delete_agent("agent-id-here")
@@ -267,11 +267,11 @@ client.delete_agent("agent-id-here")
 
 ##### `list_agent_keys(agent_id: str) -> list[AgentKey]`
 
-List key lifecycle entries (`active`, `grace`, `revoked`) for an agent. Requires API key authentication.
+List key lifecycle entries (`active`, `grace`, `revoked`) for an agent. Requires bearer auth (JWT or API key).
 
 ##### `rotate_agent_key(...) -> RotateKeyResult`
 
-Rotate an agent key. Requires API key auth plus step-up verification via either:
+Rotate an agent key. Requires bearer auth (JWT or API key) plus step-up verification via either:
 - `step_up_code` (email code), or
 - `challenge` + `proof` signed by a current key.
 
