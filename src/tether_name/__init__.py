@@ -33,7 +33,7 @@ from .exceptions import (
     TetherKeyError
 )
 
-__version__ = "2.0.3"
+__version__ = "2.0.4"
 __author__ = "Commit 451"
 __email__ = "python@tether.name"
 __homepage__ = "https://tether.name"
